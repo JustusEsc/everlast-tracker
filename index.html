@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Everlast Tracker – Train Harder. Track Everything.</title>
+  <meta name="description" content="Everlast Tracker connects to your Everlast punch sensor to track every hit, score every session, and help you become a better boxer.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #6366f1;
+      --accent-dim: rgba(99,102,241,0.15);
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: rgba(255,255,255,0.08);
+      --text: #f0f0f0;
+      --muted: #888;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .nav-logo span { color: var(--accent); }
+    .nav-cta {
+      background: var(--accent); color: #fff; border: none;
+      padding: 10px 22px; border-radius: 100px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: opacity .15s;
+    }
+    .nav-cta:hover { opacity: .85; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-dim); border: 1px solid rgba(99,102,241,0.3);
+      color: #a5b4fc; font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+      padding: 6px 16px; border-radius: 100px; margin-bottom: 28px;
+    }
+    .hero-badge::before {
+      content: ''; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1 {
+      font-size: clamp(40px, 8vw, 72px);
+      font-weight: 800; letter-spacing: -2px; line-height: 1.05;
+      margin-bottom: 24px;
+    }
+    h1 em { color: var(--accent); font-style: normal; }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--muted); max-width: 520px; margin: 0 auto 44px;
+      line-height: 1.6;
+    }
+
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent); color: #fff;
+      padding: 16px 32px; border-radius: 100px;
+      font-size: 16px; font-weight: 600; text-decoration: none;
+      transition: opacity .15s, transform .15s;
+    }
+    .btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+      padding: 16px 32px; border-radius: 100px;
+      font-size: 16px; font-weight: 600; text-decoration: none;
+      transition: border-color .15s, transform .15s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+
+    /* STATS STRIP */
+    .stats {
+      display: flex; justify-content: center; gap: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin: 0;
+    }
+    .stat {
+      flex: 1; max-width: 240px;
+      padding: 36px 24px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-size: 36px; font-weight: 800; letter-spacing: -1px; color: var(--accent); }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* FEATURES */
+    .section { padding: 100px 24px; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+      color: var(--accent); text-transform: uppercase; margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800; letter-spacing: -1px; line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-sub { font-size: 17px; color: var(--muted); max-width: 500px; line-height: 1.6; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2px; margin-top: 60px;
+      border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+    }
+    .feature-card {
+      background: var(--surface);
+      padding: 36px 32px;
+      transition: background .15s;
+    }
+    .feature-card:hover { background: #1a1a1a; }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: var(--accent-dim); border: 1px solid rgba(99,102,241,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 20px;
+    }
+    .feature-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .feature-body { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* HOW IT WORKS */
+    .how-section {
+      padding: 100px 24px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .how-inner { max-width: 1100px; margin: 0 auto; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 40px; margin-top: 60px;
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; margin-bottom: 18px;
+    }
+    .step-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step-body { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* EVER SCORE */
+    .ever-section { padding: 100px 24px; max-width: 1100px; margin: 0 auto; }
+    .ever-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+      align-items: center; margin-top: 60px;
+    }
+    @media (max-width: 700px) { .ever-grid { grid-template-columns: 1fr; } }
+    .ever-score-display {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px; padding: 48px;
+      text-align: center;
+    }
+    .ever-score-num {
+      font-size: 88px; font-weight: 900; letter-spacing: -4px;
+      color: var(--accent); line-height: 1;
+    }
+    .ever-score-label { font-size: 13px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; }
+    .ever-bars { margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+    .ever-bar-row { display: flex; align-items: center; gap: 12px; }
+    .ever-bar-name { font-size: 12px; color: var(--muted); width: 60px; text-align: right; }
+    .ever-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 100px; overflow: hidden; }
+    .ever-bar-fill { height: 100%; border-radius: 100px; background: var(--accent); }
+
+    /* CTA */
+    .cta-section {
+      padding: 100px 24px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; bottom: -200px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 16px; }
+    .cta-section p { font-size: 17px; color: var(--muted); margin-bottom: 40px; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    footer p { font-size: 13px; color: var(--muted); }
+    footer a { font-size: 13px; color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .stats { flex-wrap: wrap; }
+      .stat { min-width: 50%; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">Everlast<span>Tracker</span></div>
+    <a href="#download" class="nav-cta">Download</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Now available on iOS</div>
+    <h1>Train Harder.<br><em>Track Everything.</em></h1>
+    <p class="hero-sub">Connect your Everlast punch sensor and track every hit, every session, every gain. Your boxing coach — in your pocket.</p>
+    <div class="hero-btns">
+      <a href="#download" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Store
+      </a>
+      <a href="#features" class="btn-secondary">See Features</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Training Modes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">Real-Time</div>
+      <div class="stat-label">Punch Tracking</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">E.V.E.R.</div>
+      <div class="stat-label">Performance Score</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">BLE</div>
+      <div class="stat-label">Sensor Connected</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section" id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything your training needs</h2>
+    <p class="section-sub">Built from the ground up for boxers who take their performance seriously.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🥊</div>
+        <div class="feature-title">Punch Sensor Integration</div>
+        <div class="feature-body">Pairs with your Everlast Bluetooth sensor to capture punch count, speed, and power — automatically, every session.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">E.V.E.R. Score</div>
+        <div class="feature-body">A single performance rating built from Endurance, Velocity, Explosiveness, and Resilience. Watch it climb as you improve.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚔️</div>
+        <div class="feature-title">Fight Mode</div>
+        <div class="feature-body">Go head-to-head against another fighter. Live punch-for-punch scoring with real-time momentum swings.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎬</div>
+        <div class="feature-title">Video Training</div>
+        <div class="feature-body">Follow along with guided workout videos while your sensor tracks every combination you throw.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <div class="feature-title">Leaderboards</div>
+        <div class="feature-body">Compete in Iron Fist challenges. See where you stack up globally and with your training partners.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👊</div>
+        <div class="feature-title">Community Feed</div>
+        <div class="feature-body">Share your sessions, fist-bump great workouts, and stay motivated alongside a community of fighters.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="how-inner">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Up and training in minutes</h2>
+      <div class="steps">
+        <div>
+          <div class="step-num">1</div>
+          <div class="step-title">Create your account</div>
+          <div class="step-body">Sign up in seconds. Your stats, history, and progress are synced to the cloud automatically.</div>
+        </div>
+        <div>
+          <div class="step-num">2</div>
+          <div class="step-title">Connect your sensor</div>
+          <div class="step-body">Pair your Everlast Bluetooth punch sensor via the Profile tab. One tap — it remembers for next time.</div>
+        </div>
+        <div>
+          <div class="step-num">3</div>
+          <div class="step-title">Pick your mode</div>
+          <div class="step-body">Choose from Rounds, Free, Video, or Fight mode depending on how you want to train today.</div>
+        </div>
+        <div>
+          <div class="step-num">4</div>
+          <div class="step-title">Watch your score grow</div>
+          <div class="step-body">Every session feeds your E.V.E.R. Score. Your performance history is always a tap away.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVER SCORE -->
+  <div class="ever-section">
+    <div class="section-label">E.V.E.R. Score</div>
+    <div class="ever-grid">
+      <div>
+        <h2 class="section-title">One number that tells the whole story</h2>
+        <p class="section-sub">The E.V.E.R. Score combines four performance pillars into a single rating that grows as you train. No guessing — just progress.</p>
+        <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:12px"><div style="width:8px;height:8px;border-radius:50%;background:#818cf8"></div><div style="font-size:14px"><strong>E</strong>ndurance — how long you can sustain output</div></div>
+          <div style="display:flex;align-items:center;gap:12px"><div style="width:8px;height:8px;border-radius:50%;background:#818cf8"></div><div style="font-size:14px"><strong>V</strong>elocity — your punch speed</div></div>
+          <div style="display:flex;align-items:center;gap:12px"><div style="width:8px;height:8px;border-radius:50%;background:#818cf8"></div><div style="font-size:14px"><strong>E</strong>xplosiveness — peak power output</div></div>
+          <div style="display:flex;align-items:center;gap:12px"><div style="width:8px;height:8px;border-radius:50%;background:#818cf8"></div><div style="font-size:14px"><strong>R</strong>esilience — consistency under fatigue</div></div>
+        </div>
+      </div>
+      <div class="ever-score-display">
+        <div class="ever-score-num">847</div>
+        <div class="ever-score-label">E.V.E.R. Score</div>
+        <div class="ever-bars">
+          <div class="ever-bar-row">
+            <div class="ever-bar-name">Endurance</div>
+            <div class="ever-bar-track"><div class="ever-bar-fill" style="width:82%"></div></div>
+          </div>
+          <div class="ever-bar-row">
+            <div class="ever-bar-name">Velocity</div>
+            <div class="ever-bar-track"><div class="ever-bar-fill" style="width:91%"></div></div>
+          </div>
+          <div class="ever-bar-row">
+            <div class="ever-bar-name">Explosive</div>
+            <div class="ever-bar-track"><div class="ever-bar-fill" style="width:78%"></div></div>
+          </div>
+          <div class="ever-bar-row">
+            <div class="ever-bar-name">Resilience</div>
+            <div class="ever-bar-track"><div class="ever-bar-fill" style="width:86%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section class="cta-section" id="download">
+    <h2>Ready to start tracking?</h2>
+    <p>Download Everlast Tracker and connect your sensor today.</p>
+    <a href="#" class="btn-primary" style="display:inline-flex">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      Download on the App Store
+    </a>
+  </section>
+
+  <footer>
+    <p>© 2026 Everlast Tracker. All rights reserved.</p>
+    <div style="display:flex;gap:24px">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="mailto:justusescarpita@gmail.com">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>
